@@ -1,0 +1,5 @@
+bot: true
+token: TOKEN_HERE
+channels:
+  - CHANNEL_ID_HERE
+  - CHANNEL_ID_HERE
