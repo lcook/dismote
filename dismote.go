@@ -36,15 +36,13 @@ LoadConfig:
 		log.Fatalln("Error creating Discord session,", err)
 	}
 
-	prefix := configFile.Prefix
-
 	dg.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if configFile.Bot && m.Author.ID == s.State.User.ID || !configFile.IsChannel(m.ChannelID) {
 			return
 		}
 
-		cmds := commands.New(s, m, prefix)
-		cmds.Register(map[string]interface{}{
+		cmds := commands.New(s, m, configFile.Prefix)
+		cmds.Register(commands.Modules{
 			"default": cmds.Stealer,
 			"info":    cmds.Info,
 			"clear":   cmds.Clear,

@@ -25,14 +25,14 @@ type Emoji struct {
 	Data string
 }
 
-func (c *Commands) Stealer() {
-	if !strings.HasPrefix(c.Message.Content, EmojiPrefix) {
+func (h *Handler) Stealer() {
+	if !strings.HasPrefix(h.Message.Content, EmojiPrefix) {
 		return
 	}
 
 	emojis := []Emoji{}
 
-	content := strings.Split(strings.Replace(c.Message.Content, " ", "", -1), EmojiSuffix)
+	content := strings.Split(strings.Replace(h.Message.Content, " ", "", -1), EmojiSuffix)
 	for _, element := range content {
 		if element == "" || !strings.HasPrefix(element, EmojiPrefix) {
 			continue
@@ -47,7 +47,7 @@ func (c *Commands) Stealer() {
 
 		resp, err := http.Get(endpointEmoji(emoji.ID))
 		if err != nil {
-			err, _ := c.Session.ChannelMessageSend(c.Message.ChannelID, "Ooops! I was unable to fetch "+formatEmoji(emoji))
+			err, _ := h.Session.ChannelMessageSend(h.Message.ChannelID, "Ooops! I was unable to fetch "+formatEmoji(emoji))
 			if err != nil {
 				log.Println("Stealer:", err)
 			}
@@ -60,10 +60,10 @@ func (c *Commands) Stealer() {
 		emoji.Type = http.DetectContentType(body)
 		emoji.Data = "data:" + emoji.Type + ";base64," + base64.StdEncoding.EncodeToString(body)
 
-		emj, err := c.Session.GuildEmojiCreate(c.Message.GuildID, emoji.Name, emoji.Data, nil)
+		emj, err := h.Session.GuildEmojiCreate(h.Message.GuildID, emoji.Name, emoji.Data, nil)
 		if err != nil {
 			message := fmt.Sprintf("Ooops! I was unable to add %s, %s", formatEmoji(emoji), err)
-			err, _ := c.Session.ChannelMessageSend(c.Message.ChannelID, message)
+			err, _ := h.Session.ChannelMessageSend(h.Message.ChannelID, message)
 
 			if err != nil {
 				log.Println("Stealer:", err)
@@ -78,7 +78,7 @@ func (c *Commands) Stealer() {
 		emojis = append(emojis, emoji)
 	}
 
-	err := c.Session.ChannelMessageDelete(c.Message.ChannelID, c.Message.ID)
+	err := h.Session.ChannelMessageDelete(h.Message.ChannelID, h.Message.ID)
 	if err != nil {
 		log.Println("Stealer:", err)
 	}
@@ -96,7 +96,7 @@ func (c *Commands) Stealer() {
 		Color: randomColor(),
 	}
 
-	_, err = c.Session.ChannelMessageSendEmbed(c.Message.ChannelID, &embed)
+	_, err = h.Session.ChannelMessageSendEmbed(h.Message.ChannelID, &embed)
 	if err != nil {
 		log.Println("Stealer:", err)
 	}

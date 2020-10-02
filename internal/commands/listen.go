@@ -7,8 +7,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func (c *Commands) Listen() {
-	status := strings.TrimPrefix(c.Message.Content, c.Prefix+"listen ")
+func (h *Handler) Listen() {
+	status := strings.TrimPrefix(h.Message.Content, h.Prefix+"listen ")
 
 	embed := discordgo.MessageEmbed{
 		Title: "__Status updated__!",
@@ -18,17 +18,17 @@ func (c *Commands) Listen() {
 		Color: randomColor(),
 	}
 
-	err := c.Session.UpdateListeningStatus(status)
+	err := h.Session.UpdateListeningStatus(status)
 	if err != nil {
 		log.Println("Listen:", err)
 	}
 
-	err = c.Session.ChannelMessageDelete(c.Message.ChannelID, c.Message.ID)
+	err = h.Session.ChannelMessageDelete(h.Message.ChannelID, h.Message.ID)
 	if err != nil {
 		log.Println("Listen:", err)
 	}
 
-	_, err = c.Session.ChannelMessageSendEmbed(c.Message.ChannelID, &embed)
+	_, err = h.Session.ChannelMessageSendEmbed(h.Message.ChannelID, &embed)
 	if err != nil {
 		log.Println("Listen:", err)
 	}

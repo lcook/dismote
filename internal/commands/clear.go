@@ -4,8 +4,8 @@ import (
 	"log"
 )
 
-func (c *Commands) Clear() {
-	err := c.Session.ChannelMessageDelete(c.Message.ChannelID, c.Message.ID)
+func (h *Handler) Clear() {
+	err := h.Session.ChannelMessageDelete(h.Message.ChannelID, h.Message.ID)
 	if err != nil {
 		log.Println("Clear:", err)
 		return
@@ -13,12 +13,12 @@ func (c *Commands) Clear() {
 
 	ids := []string{}
 
-	batch, _ := c.Session.ChannelMessages(c.Message.ChannelID, 100, "", "", "")
+	batch, _ := h.Session.ChannelMessages(h.Message.ChannelID, 100, "", "", "")
 	for _, message := range batch {
 		ids = append(ids, message.ID)
 	}
 
-	err = c.Session.ChannelMessagesBulkDelete(c.Message.ChannelID, ids)
+	err = h.Session.ChannelMessagesBulkDelete(h.Message.ChannelID, ids)
 	if err != nil {
 		log.Println("Clear:", err)
 		return

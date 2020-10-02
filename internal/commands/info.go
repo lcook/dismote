@@ -8,8 +8,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func (c *Commands) Info() {
-	guild, _ := c.Session.Guild(c.Message.GuildID)
+func (h *Handler) Info() {
+	guild, _ := h.Session.Guild(h.Message.GuildID)
 	emojis := guild.Emojis
 	emojiIcon := 0
 	emojiAnimated := 0
@@ -35,12 +35,12 @@ func (c *Commands) Info() {
 		Color:     randomColor(),
 	}
 
-	err := c.Session.ChannelMessageDelete(c.Message.ChannelID, c.Message.ID)
+	err := h.Session.ChannelMessageDelete(h.Message.ChannelID, h.Message.ID)
 	if err != nil {
 		log.Println("Info:", err)
 	}
 
-	_, err = c.Session.ChannelMessageSendEmbed(c.Message.ChannelID, &embed)
+	_, err = h.Session.ChannelMessageSendEmbed(h.Message.ChannelID, &embed)
 	if err != nil {
 		log.Println("Info:", err)
 	}

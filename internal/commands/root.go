@@ -9,20 +9,22 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type Commands struct {
-	FuncMap map[string]interface{}
+type Modules map[string]interface{}
+
+type Handler struct {
+	CmdMap  Modules
 	Session *discordgo.Session
 	Message *discordgo.MessageCreate
 	Prefix  string
 }
 
-func (c *Commands) Execute(str string) {
+func (h *Handler) Execute(str string) {
 	cmd := strings.Split(strings.ToLower(str), " ")[0]
-	cmd = strings.TrimPrefix(cmd, c.Prefix)
-	typ := reflect.TypeOf(c.FuncMap[cmd])
+	cmd = strings.TrimPrefix(cmd, h.Prefix)
+	typ := reflect.TypeOf(h.CmdMap[cmd])
 
-	if _, ok := c.FuncMap[cmd]; !ok {
-		c.FuncMap["default"].(func())()
+	if _, ok := h.CmdMap[cmd]; !ok {
+		h.CmdMap["default"].(func())()
 		return
 	}
 
@@ -30,26 +32,24 @@ func (c *Commands) Execute(str string) {
 		return
 	}
 
-	c.FuncMap[cmd].(func())()
+	h.CmdMap[cmd].(func())()
 }
 
-func (c *Commands) Register(fns map[string]interface{}) {
+func (h *Handler) Register(fns Modules) {
 	for str, fn := range fns {
 		cmd := strings.ToLower(str)
 		typ := reflect.TypeOf(fn)
 
-		if c.FuncMap[cmd] != nil || typ.Kind() != reflect.Func {
+		if h.CmdMap[cmd] != nil || typ.Kind() != reflect.Func {
 			return
 		}
 
-		c.FuncMap[cmd] = fn
+		h.CmdMap[cmd] = fn
 	}
 }
 
-func New(s *discordgo.Session, m *discordgo.MessageCreate, p string) *Commands {
-	return &Commands{
-		make(map[string]interface{}), s, m, p,
-	}
+func New(s *discordgo.Session, m *discordgo.MessageCreate, p string) *Handler {
+	return &Handler{make(Modules), s, m, p}
 }
 
 func randomColor() int {
