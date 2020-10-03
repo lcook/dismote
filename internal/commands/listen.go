@@ -8,7 +8,7 @@ import (
 )
 
 func (h *Handler) Listen() {
-	status := strings.TrimPrefix(h.Message.Content, h.Prefix+"listen ")
+	status := strings.TrimPrefix(h.Message.Content, h.Config.Prefix+"listen ")
 
 	embed := discordgo.MessageEmbed{
 		Title: "__Status updated__!",

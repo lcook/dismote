@@ -41,13 +41,18 @@ LoadConfig:
 			return
 		}
 
-		cmds := commands.New(s, m, configFile.Prefix)
+		if !configFile.Bot && configFile.Owner == "" {
+			configFile.Owner = s.State.User.ID
+		}
+
+		cmds := commands.New(s, m, &configFile)
+
 		cmds.Register(commands.Modules{
-			"default": cmds.Stealer,
-			"info":    cmds.Info,
-			"clear":   cmds.Clear,
-			"help":    cmds.Help,
-			"listen":  cmds.Listen,
+			"default": {cmds.Stealer, commands.PermAll},
+			"info":    {cmds.Info, commands.PermAll},
+			"clear":   {cmds.Clear, commands.PermOwner},
+			"help":    {cmds.Help, commands.PermAll},
+			"listen":  {cmds.Listen, commands.PermOwner},
 		})
 
 		cmds.Execute(m.Content)

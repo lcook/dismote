@@ -10,13 +10,17 @@ import (
 func (h *Handler) Help() {
 	fields := []*discordgo.MessageEmbedField{}
 
-	for k := range h.CmdMap {
+	for k, v := range h.ModuleMap {
 		if k == "default" {
 			continue
 		}
 
+		if v.Permission == PermOwner && h.Message.Author.ID != h.Config.Owner {
+			continue
+		}
+
 		fields = append(fields, &discordgo.MessageEmbedField{
-			Name: h.Prefix + k, Value: "\u200e", Inline: true,
+			Name: h.Config.Prefix + k, Value: "\u200e", Inline: true,
 		})
 	}
 

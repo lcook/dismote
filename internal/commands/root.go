@@ -7,24 +7,43 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"gitlab.com/lcook/dismote/internal/config"
 )
 
-type Modules map[string]interface{}
+type Data struct {
+	Callback   interface{}
+	Permission int
+}
+
+type Modules map[string]Data
 
 type Handler struct {
-	CmdMap  Modules
-	Session *discordgo.Session
-	Message *discordgo.MessageCreate
-	Prefix  string
+	ModuleMap Modules
+	Session   *discordgo.Session
+	Message   *discordgo.MessageCreate
+	Config    *config.Config
+}
+
+func (h *Handler) Register(mods Modules) {
+	for str, data := range mods {
+		cmd := strings.ToLower(str)
+		typ := reflect.TypeOf(data.Callback)
+
+		if h.ModuleMap[cmd].Callback != nil || typ.Kind() != reflect.Func {
+			return
+		}
+
+		h.ModuleMap[cmd] = data
+	}
 }
 
 func (h *Handler) Execute(str string) {
 	cmd := strings.Split(strings.ToLower(str), " ")[0]
-	cmd = strings.TrimPrefix(cmd, h.Prefix)
-	typ := reflect.TypeOf(h.CmdMap[cmd])
+	cmd = strings.TrimPrefix(cmd, h.Config.Prefix)
+	typ := reflect.TypeOf(h.ModuleMap[cmd].Callback)
 
-	if _, ok := h.CmdMap[cmd]; !ok {
-		h.CmdMap["default"].(func())()
+	if _, ok := h.ModuleMap[cmd]; !ok || !strings.HasPrefix(str, h.Config.Prefix) {
+		h.ModuleMap["default"].Callback.(func())()
 		return
 	}
 
@@ -32,24 +51,20 @@ func (h *Handler) Execute(str string) {
 		return
 	}
 
-	h.CmdMap[cmd].(func())()
-}
-
-func (h *Handler) Register(fns Modules) {
-	for str, fn := range fns {
-		cmd := strings.ToLower(str)
-		typ := reflect.TypeOf(fn)
-
-		if h.CmdMap[cmd] != nil || typ.Kind() != reflect.Func {
-			return
+	switch h.ModuleMap[cmd].Permission {
+	case PermAll:
+		h.ModuleMap[cmd].Callback.(func())()
+	case PermOwner:
+		if h.Message.Author.ID == h.Config.Owner {
+			h.ModuleMap[cmd].Callback.(func())()
 		}
-
-		h.CmdMap[cmd] = fn
+	default:
+		return
 	}
 }
 
-func New(s *discordgo.Session, m *discordgo.MessageCreate, p string) *Handler {
-	return &Handler{make(Modules), s, m, p}
+func New(s *discordgo.Session, m *discordgo.MessageCreate, c *config.Config) *Handler {
+	return &Handler{make(Modules), s, m, c}
 }
 
 func randomColor() int {

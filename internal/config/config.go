@@ -16,6 +16,7 @@ type Config struct {
 	Token    string
 	Channels []string
 	Prefix   string
+	Owner    string
 }
 
 func (c *Config) IsChannel(s string) bool {
@@ -66,5 +67,5 @@ func LoadConfig(c string) (Config, error) {
 		prefix = config.Prefix
 	}
 
-	return Config{config.Bot, config.Token, channels, prefix}, nil
+	return Config{config.Bot, config.Token, channels, prefix, config.Owner}, nil
 }

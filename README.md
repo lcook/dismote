@@ -13,6 +13,7 @@ Minimal Discord bot which listens on the provided channels as defined in the con
 
 You'll find a [yaml configuration](config.yaml) in this repository that the bot will use. The variables are as follows:
 
+- **owner (str, default: User ID of connecting account)**: User ID of the owner with elevated bot privileges. See [commands](#commands) for according permissions.
 - **bot (bool)**: **true** if running as a bot and **false** if running as a self-bot (not recommended since self-bots are in violation of the Discord ToS).
 - **token (str)**: Bot/account token.
 - **channels (array)**: Array of channels to listen on.
@@ -47,11 +48,11 @@ Logs are outputted to the terminal, so it's suggested running the application in
 
 Whilst dismote offers little functionality it does come with a few handy commands. Command functions can be found [here](internal/commands).
 
-| Command  | Description |
-| ------------- | ------------- |
-| help | Prints available commands |
-| info | Displays servers statistics |
-| clear | Bulk delete previous messages |
-| listen | Set listening status |
+| Command  | Description | Permission |
+| ------------- | ------------- | ------------- |
+| help | Prints available commands | All |
+| info | Displays servers statistics | All |
+| clear | Bulk delete channel messages | Owner |
+| listen | Set listening status | Owner |
 
 Implicity, the "stealer" command is set for the default command to be ran. To readily add emotes to a server you must be in a channel that's listed in the settings, from there type out the emotes you want added. **Note**: messages that don't start with an emote are ignored and will not be added. 
